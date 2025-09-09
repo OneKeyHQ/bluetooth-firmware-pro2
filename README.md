@@ -1,8 +1,12 @@
-# OneKey Pro Bluetooth Firmware
+# OneKey Pro2 Bluetooth Firmware
 
-This repo contains bluetooth firmware for OneKey Pro
+This repo contains bluetooth firmware for OneKey Pro2
 
 The firmware is based on NRF5 SDK 16.0.0, and build with CMake
+
+## Architecture
+
+The FindMy ADK (Accessory Development Kit) is linked to the executable as a static library, providing the core FindMy functionality for the Bluetooth firmware. The library can be found in the `fmnadk/` directory.
 
 ## How to build
 
@@ -16,9 +20,6 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 -----END EC PRIVATE KEY-----
 EOF
 )
-
-# export toolchain prefix
-export TOOL_CHAIN_PREFIX="arm-none-eabi"
 
 # call build script
 ./build.sh
