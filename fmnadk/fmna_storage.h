@@ -11,25 +11,27 @@
             0x7F000  <--- |-----------------------|------
                           |      MBR params       |  Size 4 Kb
             0x7E000  <--- |-----------------------|------ 
-                          |      bootloader       |  Size 64 Kb
-            0x6E000  <--- |-----------------------|------
-                          |     onekey info       |  Size 12 Kb (nvs)  
-            0x6B000  <--- |-----------------------|------  
+                          |      bootloader       |  Size 56 Kb
+            0x70000  <--- |-----------------------|------
+                          |     peer manage       |  Size 12 Kb
+            0x6D000  <--- |-----------------------|------
+                          |     onekey info       |  Size 4 Kb
+            0x6C000  <--- |-----------------------|------  
                           |findmy init token/uuid |  Size 4 Kb
-            0x6A000  <--- |-----------------------|------  
-                          |      findmy info      |  Size 16 Kb (nvs)
-            0x66000  <--- |-----------------------|------
-                          |          APP          |  Size 256 Kb          
+            0x6B000  <--- |-----------------------|------  
+                          |     findmy info       |  Size 16 Kb (nvs)
+            0x67000  <--- |-----------------------|------
+                          |          APP          |  Size 260 Kb          
             0x26000  <--- |-----------------------|------
                           |       softdevice      |  Size 152 Kb    
             0x0000   <--- |-----------------------|------
 *****************************************************************************/
-
-#define FSTORAGE_FMNA_NVS_START_ADDR 0x66000
-#define FSTORAGE_FMNA_NVS_END_ADDR   0x68FFF
+// please refer to @ok_device_config.h for onekey flash configuration 
+#define FSTORAGE_FMNA_NVS_START_ADDR 0x67000
+#define FSTORAGE_FMNA_NVS_END_ADDR   0x6AFFF
 #define FMNA_NVS_PAGE_SIZE           0x1000
 
-#define SOFTWARE_AUTH_UUID_ADDR      0x6A000
+#define SOFTWARE_AUTH_UUID_ADDR      0x6B000
 #define SOFTWARE_AUTH_TOKEN_ADDR     SOFTWARE_AUTH_UUID_ADDR + SOFTWARE_AUTH_UUID_BLEN
 
 // fmna storage IDs
