@@ -19,10 +19,10 @@
 #define BLE_GAP_DATA_LENGTH_DEFAULT    27  //!< The stack's default data length.
 #define BLE_GAP_DATA_LENGTH_MAX        251 //!< Maximum data length.
 
-#define MIN_CONN_INTERVAL              MSEC_TO_UNITS(15, UNIT_1_25_MS) /**< Minimum acceptable connection interval (10 ms). */
-#define MAX_CONN_INTERVAL              MSEC_TO_UNITS(2000, UNIT_1_25_MS) /**< Maximum acceptable connection interval (100 ms) */
+#define MIN_CONN_INTERVAL              MSEC_TO_UNITS(15, UNIT_1_25_MS) /**< Minimum acceptable connection interval (15 ms). */
+#define MAX_CONN_INTERVAL              MSEC_TO_UNITS(2000, UNIT_1_25_MS) /**< Maximum acceptable connection interval (2000 ms) */
 #define SLAVE_LATENCY                  0                               /**< Slave latency. */
-#define CONN_SUP_TIMEOUT               MSEC_TO_UNITS(5000, UNIT_10_MS) /**< Connection supervisory timeout (4 seconds). */
+#define CONN_SUP_TIMEOUT               MSEC_TO_UNITS(5000, UNIT_10_MS) /**< Connection supervisory timeout (5 seconds). */
 #define FIRST_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(5000)
 #define NEXT_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(30000)
 #define MAX_CONN_PARAM_UPDATE_COUNT    3
@@ -313,10 +313,10 @@ void ok_ble_evt_handler(ble_evt_t const *p_ble_evt)
 
         case BLE_GAP_EVT_CONN_PARAM_UPDATE:
             NRF_LOG_INFO("min %d, max %d, latency %d, timeout %d", 
-                         p_ble_evt->evt.gap_evt.params.connected.conn_params.min_conn_interval,
-                         p_ble_evt->evt.gap_evt.params.connected.conn_params.max_conn_interval,
-                         p_ble_evt->evt.gap_evt.params.connected.conn_params.slave_latency,
-                         p_ble_evt->evt.gap_evt.params.connected.conn_params.conn_sup_timeout);
+                         p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.min_conn_interval,
+                         p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.max_conn_interval,
+                         p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.slave_latency,
+                         p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.conn_sup_timeout);
             break;
 
         default:

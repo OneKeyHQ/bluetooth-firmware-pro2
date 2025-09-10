@@ -189,7 +189,7 @@ target_include_directories(
 
 ########################### Compile definitions #############################
 target_compile_definitions(
-  fmnadk PUBLIC
+  fmnadk PRIVATE
   # ARM architecture definitions
   __SIZEOF_WCHAR_T=4
   __ARM_ARCH_7EM__
@@ -226,7 +226,6 @@ set(VFP_FLAGS
 )
 
 set(CMAKE_COMMON_FLAGS
-  -g3
   -ffunction-sections
   -fdata-sections
   -fno-strict-aliasing
@@ -249,29 +248,12 @@ target_compile_options(
   ${MCPU_FLAGS}
   ${VFP_FLAGS}
   ${CMAKE_COMMON_FLAGS}
-)
-
-# Link options
-target_link_options(
-  fmnadk PRIVATE
-
-  # Linker flags
-  --specs=nano.specs
-  --specs=nosys.specs
-
-  # Linker symbols and options
-  -Wl,--defsym=__vfprintf=__vfprintf_long
-  -Wl,--defsym=__vfscanf=__vfscanf_int
-  -Wl,-X
-  -Wl,--omagic
-  -Wl,-eReset_Handler
-  -Wl,--fatal-warnings
-  -Wl,-EL
-  -Wl,--gc-sections
-  -Wl,-u_vectors
-  -Wl,--emit-relocs
-
-  -Wl,-print-memory-usage
+  $<$<CONFIG:Debug>:
+  -Og -ggdb
+  >
+  $<$<CONFIG:Release>:
+  -Os -g0
+  >
 )
 
 ########################### Install #############################

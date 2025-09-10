@@ -56,7 +56,6 @@ void    ble_adv_manage_update(uint8_t instance_id, uint8_t data_type, void *data
 void    ble_adv_manage_register(uint8_t instance_id, ble_adv_instance_t *adv_config, bool start_adv_immediately);
 void    ble_adv_manage_unregister(uint8_t instance_id, bool stop_adv);
 void    ble_adv_manage_event(ble_evt_t const *p_ble_evt);
-uint8_t ble_adv_manage_conn_instance_id_get(ble_evt_t const *p_ble_evt);
 
 /************************************************ BLE common functions ************************************************/
 void ok_trans_timer_init(void);

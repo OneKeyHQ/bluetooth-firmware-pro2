@@ -466,11 +466,16 @@ target_link_options(
   -Wl,-Map=${CMAKE_PROJECT_NAME}.map
 )
 
+add_library(Fmnadk STATIC IMPORTED)
+set_target_properties(Fmnadk PROPERTIES
+  IMPORTED_LOCATION "${SDK_BUILD_ROOT}/fmnadk/lib/libfmnadk.a"
+)
+
 target_link_libraries(
   ${CMAKE_PROJECT_NAME} PRIVATE
   ${NRF_SDK_LINK}
   MicroECC
-  ${SDK_BUILD_ROOT}/fmnadk/lib/libfmnadk.a
+  Fmnadk
   m # math
 )
 

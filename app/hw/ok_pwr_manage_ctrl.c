@@ -209,7 +209,7 @@ NRF_SDH_SOC_OBSERVER(m_soc_observer, 0, sdh_soc_handler, NULL);
 /**@brief Handler for shutdown preparation.
  *
  * @details During shutdown procedures, this function will be called at a 1 second interval
- *          untill the function returns true. When the function returns true, it means that the
+ *          until the function returns true. When the function returns true, it means that the
  *          app is ready to reset to DFU mode.
  *
  * @param[in]   event   Power manager event.

@@ -89,7 +89,7 @@ static void uart_event_handle(app_uart_evt_t *p_event)
         }
     }
 
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR || p_event->evt_type == APP_UART_COMMUNICATION_ERROR) {
+    if (p_event->evt_type == APP_UART_FIFO_ERROR || p_event->evt_type == APP_UART_COMMUNICATION_ERROR) {
         NRF_LOG_INFO("uart error type %d", p_event->evt_type);
     }
 }

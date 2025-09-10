@@ -120,7 +120,7 @@ static void ok_cmd_uplink_pwr_ctrl_handler(void *data, uint16_t length)
         ok_ble_gap_local_disconnect();
         pmu_p->SetState(PWR_STATE_HARD_OFF);
     } else if (sub_cmd == OK_UPLINK_SUB_CMD_EMMC_POWER_TURN_OFF) {
-    } else if (sub_cmd == OK_UPLINK_SUB_CMD_EMCC_POWER_TURN_ON) {
+    } else if (sub_cmd == OK_UPLINK_SUB_CMD_EMMC_POWER_TURN_ON) {
     } else if (sub_cmd == OK_UPLINK_SUB_CMD_POWER_PERCENT_GET) {
         bak_buff[0] = OK_DOWNLINK_MAIN_CMD_POWER_PERCENT;
         bak_buff[1] = pmu_p->PowerStatus->batteryPercent;
@@ -250,7 +250,7 @@ static void ok_cmd_uplink_flashled_handler(void *data, uint16_t length)
     uint8_t sub_cmd          = 0;
     uint8_t rsp_len          = 0;
     uint8_t bak_buff[4]      = {0};
-    uint8_t s_led_brightness = 0;
+    static uint8_t s_led_brightness = 0;
 
     if (data == NULL || length == 0) {
         return;

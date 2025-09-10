@@ -248,8 +248,8 @@ int main(void)
     log_init();
     gpio_init();
     power_management_init();
-    nrf_crypto_init(); // why here
-
+    nrf_crypto_init();
+    
     ok_pmu_init();
     ok_device_config_init();
     ok_periph_init();

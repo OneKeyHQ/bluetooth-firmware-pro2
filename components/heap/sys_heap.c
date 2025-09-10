@@ -294,7 +294,7 @@ void *rt_realloc(void *rmem, size_t newsize)
         (uint8_t *)rmem >= (uint8_t *)heap_end)
     {
         /* illegal memory */
-        return rmem;
+        return RT_NULL;
     }
 
     mem = (struct heap_mem *)((uint8_t *)rmem - SIZEOF_STRUCT_MEM);

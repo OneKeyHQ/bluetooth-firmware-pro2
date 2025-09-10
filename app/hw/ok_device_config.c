@@ -99,10 +99,10 @@ static bool devcfg_keystore_backup_to_uicr(ok_devcfg_keystore_t* keystore)
     }
 
     if (!is_uicr_keystore_valid) {
-        return uicr_update_customer(keystore, sizeof(keystore));
+        return uicr_update_customer(keystore, sizeof(ok_devcfg_keystore_t));
     } else {
         if (keystore_uicr.flag_locked != DEVICE_CONFIG_FLAG_MAGIC) {
-            return uicr_update_customer(keystore, sizeof(keystore));
+            return uicr_update_customer(keystore, sizeof(ok_devcfg_keystore_t));
         }
     }
 
