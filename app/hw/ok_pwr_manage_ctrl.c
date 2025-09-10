@@ -28,6 +28,10 @@ static volatile bool pmu_feat_charge_enable = false;
 static inline void pmu_status_print()
 {
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
 
     NRF_LOG_INFO("=== PowerStatus ===");
     NRF_LOG_INFO("PMIC_IRQ_IO -> %s", (nrf_gpio_pin_read(PMIC_IRQ_IO) ? "HIGH" : "LOW"));
@@ -56,6 +60,10 @@ static void pmu_sys_voltage_monitor(void)
     const uint16_t minimum_mv     = 3300;
 
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
 
     if ((match_count < match_required)) {
         // not triggered
@@ -115,6 +123,10 @@ static void pmu_pwrok_pull()
 static void pmu_irq_pull()
 {
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
 
     if (!nrf_gpio_pin_read(PMIC_IRQ_IO)) {
         PRINT_CURRENT_LOCATION();
@@ -157,6 +169,11 @@ static void pmu_status_refresh()
     static uint32_t s_rtc_counter = 0;
     PMU_t *pmu_p = power_manage_ctx_get();
 
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
+
     if (((APP_TIMER_MAX_CNT_VAL + app_timer_cnt_get() - s_rtc_counter) % APP_TIMER_MAX_CNT_VAL) > FIVE_MS_TO_RTC_COUNTER) {
         s_rtc_counter = app_timer_cnt_get();
         pmu_status_synced = false;
@@ -175,6 +192,10 @@ static void pmu_status_refresh()
 static void pmu_req_process()
 {
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
 
     // features control
     if (!pmu_feat_synced) {
@@ -195,6 +216,10 @@ static void sdh_soc_handler(uint32_t sys_evt, void *p_context)
     UNUSED_VAR(p_context);
 
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
 
     if (sys_evt == NRF_EVT_POWER_FAILURE_WARNING) {
         NRF_LOG_INFO("NRF Power POF triggered!");
@@ -268,6 +293,11 @@ void ok_battery_level_sync(void)
     static uint8_t bak_bat_persent = 0x00;
     PMU_t         *pmu_p           = power_manage_ctx_get();
 
+    if (pmu_p == NULL || pmu_p->PowerStatus == NULL) {
+        NRF_LOG_WARNING("pmu not init");
+        return;
+    }
+
     if (bak_bat_persent != pmu_p->PowerStatus->batteryPercent) {
         bak_bat_persent = pmu_p->PowerStatus->batteryPercent;
         bak_buff[0]     = OK_DOWNLINK_MAIN_CMD_POWER_PERCENT;
@@ -295,7 +325,7 @@ void ok_pmu_charge_ctrl(uint8_t enable)
 void ok_pmu_wakeup_peer_device(void)
 {
     PMU_t *pmu_p = power_manage_ctx_get();
-    if (pmu_p) {
+    if (pmu_p && pmu_p->SetState) {
         pmu_p->SetState(PWR_STATE_ON);
     }
 }

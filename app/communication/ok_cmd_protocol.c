@@ -115,6 +115,10 @@ static void ok_cmd_uplink_pwr_ctrl_handler(void *data, uint16_t length)
     OK_LOG_INFO("enter ok_cmd_uplink_pwr_ctrl_handler %d", sub_cmd);
 
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        OK_LOG_WARN("pmu not init");
+        return;
+    }
 
     if (sub_cmd == OK_UPLINK_SUB_CMD_SYS_POWER_TURN_OFF) {
         ok_ble_gap_local_disconnect();
@@ -297,6 +301,10 @@ static void ok_cmd_uplink_ble_bat_info(void *data, uint16_t length)
     OK_LOG_INFO("enter ok_cmd_uplink_ble_bat_info %d", sub_cmd);
 
     PMU_t *pmu_p = power_manage_ctx_get();
+    if (pmu_p == NULL) {
+        OK_LOG_WARN("pmu not init");
+        return;
+    }
 
     if (sub_cmd == OK_UPLINK_SUB_CMD_BAT_VOL) {
         val = pmu_p->PowerStatus->batteryVoltage;
