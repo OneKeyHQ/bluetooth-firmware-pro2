@@ -6,16 +6,66 @@ include("../toolchain.cmake")
 
 ###############################
 # Project
-project(OnekeyProBTFW_APP LANGUAGES C CXX ASM)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+project(OnekeyPro2BTFW_APP LANGUAGES C CXX ASM)
 
 message(STATUS "${CMAKE_PROJECT_NAME} Build Type: ${CMAKE_BUILD_TYPE}")
 
-###############################
-# NRF SDK
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(SDK_BUILD_ROOT "${PROJECT_SOURCE_DIR}/..")
 set(NRF_SDK_ROOT "${PROJECT_SOURCE_DIR}/../ble-firmware")
 
+###############################
+# micro-ecc library
+set(MicroECC_DIR ${NRF_SDK_ROOT}/external/micro-ecc)
+
+add_library(
+  MicroECC STATIC
+  ${MicroECC_DIR}/micro-ecc/uECC.c
+)
+
+target_include_directories(
+  MicroECC PUBLIC
+  ${MicroECC_DIR}/micro-ecc
+  ${NRF_SDK_ROOT}/components/toolchain/cmsis/include
+)
+
+target_compile_options(
+  MicroECC PRIVATE
+  # Optimization flags
+  -Os -g0 -s
+  # Uncomment the line below to enable link time optimization
+  # -flto=auto
+  # C flags common to all targets
+  -DFLOAT_ABI_HARD
+  -DuECC_ENABLE_VLI_API=0
+  -DuECC_OPTIMIZATION_LEVEL=3
+  -DuECC_SQUARE_FUNC=0
+  -DuECC_SUPPORT_COMPRESSED_POINT=0
+  -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
+  -Wall -Werror -Wno-unused-function
+  -mcpu=cortex-m4
+  -mthumb -mabi=aapcs
+  -mfloat-abi=hard -mfpu=fpv4-sp-d16
+  # keep every function in a separate section, this allows linker to discard unused ones
+  -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -fshort-enums 
+)
+
+target_link_options(
+  MicroECC PRIVATE
+  # Linker flags
+  -Os -g0 -s
+  # let linker dump unused sections
+  -Wl,--gc-sections
+  -mcpu=cortex-m4
+  -mthumb -mabi=aapcs
+  -mfloat-abi=hard -mfpu=fpv4-sp-d16
+  # use newlib in nano version
+  --specs=nano.specs -lc -lnosys -lm
+  -L${NRF_SDK_ROOT}/modules/nrfx/mdk -T${MicroECC_DIR}/nrf52hf_armgcc/armgcc/ext_micro_ecc_gcc_nRF5x.ld
+)
+
+###############################
+# NRF SDK source and include directories
 set(
   NRF_SDK_INC
   ${NRF_SDK_ROOT}/components
@@ -29,7 +79,6 @@ set(
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_bas_c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_cscs
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_cts_c
-  # ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dfu
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dis
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_gls
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_hids
@@ -52,17 +101,12 @@ set(
   ${NRF_SDK_ROOT}/components/ble/nrf_ble_gq
   ${NRF_SDK_ROOT}/components/ble/nrf_ble_qwr
   ${NRF_SDK_ROOT}/components/ble/peer_manager
-  # ${NRF_SDK_ROOT}/components/boards
   ${NRF_SDK_ROOT}/components/libraries/atomic
   ${NRF_SDK_ROOT}/components/libraries/atomic_fifo
   ${NRF_SDK_ROOT}/components/libraries/atomic_flags
   ${NRF_SDK_ROOT}/components/libraries/balloc
   ${NRF_SDK_ROOT}/components/libraries/bootloader
-  # ${NRF_SDK_ROOT}/components/libraries/bootloader/ble_dfu
   ${NRF_SDK_ROOT}/components/libraries/bootloader/dfu
-  # ${NRF_SDK_ROOT}/components/libraries/bsp
-  # ${NRF_SDK_ROOT}/components/libraries/button
-  # ${NRF_SDK_ROOT}/components/libraries/cli
   ${NRF_SDK_ROOT}/components/libraries/crc16
   ${NRF_SDK_ROOT}/components/libraries/crc32
   ${NRF_SDK_ROOT}/components/libraries/crypto
@@ -75,23 +119,17 @@ set(
   ${NRF_SDK_ROOT}/components/libraries/crypto/backend/nrf_sw
   ${NRF_SDK_ROOT}/components/libraries/crypto/backend/oberon
   ${NRF_SDK_ROOT}/components/libraries/crypto/backend/optiga
-  # ${NRF_SDK_ROOT}/components/libraries/csense
-  # ${NRF_SDK_ROOT}/components/libraries/csense_drv
   ${NRF_SDK_ROOT}/components/libraries/delay
   ${NRF_SDK_ROOT}/components/libraries/ecc
   ${NRF_SDK_ROOT}/components/libraries/experimental_section_vars
-  # ${NRF_SDK_ROOT}/components/libraries/experimental_task_manager
   ${NRF_SDK_ROOT}/components/libraries/fds
   ${NRF_SDK_ROOT}/components/libraries/fifo
   ${NRF_SDK_ROOT}/components/libraries/fstorage
-  # ${NRF_SDK_ROOT}/components/libraries/gfx
   ${NRF_SDK_ROOT}/components/libraries/gpiote
   ${NRF_SDK_ROOT}/components/libraries/hardfault
   ${NRF_SDK_ROOT}/components/libraries/hci
-  # ${NRF_SDK_ROOT}/components/libraries/led_softblink
   ${NRF_SDK_ROOT}/components/libraries/log
   ${NRF_SDK_ROOT}/components/libraries/log/src
-  # ${NRF_SDK_ROOT}/components/libraries/low_power_pwm
   ${NRF_SDK_ROOT}/components/libraries/mem_manager
   ${NRF_SDK_ROOT}/components/libraries/memobj
   ${NRF_SDK_ROOT}/components/libraries/mpu
@@ -101,8 +139,6 @@ set(
   ${NRF_SDK_ROOT}/components/libraries/queue
   ${NRF_SDK_ROOT}/components/libraries/ringbuf
   ${NRF_SDK_ROOT}/components/libraries/scheduler
-  # ${NRF_SDK_ROOT}/components/libraries/sdcard
-  # ${NRF_SDK_ROOT}/components/libraries/sensorsim
   ${NRF_SDK_ROOT}/components/libraries/slip
   ${NRF_SDK_ROOT}/components/libraries/sortlist
   ${NRF_SDK_ROOT}/components/libraries/spi_mngr
@@ -112,17 +148,7 @@ set(
   ${NRF_SDK_ROOT}/components/libraries/svc
   ${NRF_SDK_ROOT}/components/libraries/timer
   ${NRF_SDK_ROOT}/components/libraries/twi_mngr
-  # ${NRF_SDK_ROOT}/components/libraries/twi_sensor
   ${NRF_SDK_ROOT}/components/libraries/uart
-  # ${NRF_SDK_ROOT}/components/libraries/usbd
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/audio
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/cdc
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/cdc/acm
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/hid
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/hid/generic
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/hid/kbd
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/hid/mouse
-  # ${NRF_SDK_ROOT}/components/libraries/usbd/class/msc
   ${NRF_SDK_ROOT}/components/libraries/util
   ${NRF_SDK_ROOT}/components/softdevice/common
   ${NRF_SDK_ROOT}/components/softdevice/s132/headers
@@ -131,7 +157,6 @@ set(
   ${NRF_SDK_ROOT}/external/fprintf
   ${NRF_SDK_ROOT}/external/mbedtls/include
   ${NRF_SDK_ROOT}/external/micro-ecc/micro-ecc
-  # ${NRF_SDK_ROOT}/external/nrf_cc310/include
   ${NRF_SDK_ROOT}/external/nrf_oberon
   ${NRF_SDK_ROOT}/external/nrf_oberon/include
   ${NRF_SDK_ROOT}/external/nrf_tls/mbedtls/nrf_crypto/config
@@ -151,13 +176,11 @@ set(
   ${NRF_SDK_ROOT}/components/ble/ble_link_ctx_manager/ble_link_ctx_manager.c
   ${NRF_SDK_ROOT}/components/ble/ble_racp/ble_racp.c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_bas/ble_bas.c
-  # ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dfu/ble_dfu.c
-  # ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dfu/ble_dfu_bonded.c
-  # ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dfu/ble_dfu_unbonded.c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_dis/ble_dis.c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_lbs/ble_lbs.c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_nus/ble_nus.c
   ${NRF_SDK_ROOT}/components/ble/ble_services/ble_fido/ble_fido.c
+  ${NRF_SDK_ROOT}/components/ble/ble_services/ble_tps/ble_tps.c
   ${NRF_SDK_ROOT}/components/ble/common/ble_advdata.c
   ${NRF_SDK_ROOT}/components/ble/common/ble_conn_params.c
   ${NRF_SDK_ROOT}/components/ble/common/ble_conn_state.c
@@ -178,6 +201,7 @@ set(
   ${NRF_SDK_ROOT}/components/ble/peer_manager/pm_buffer.c
   ${NRF_SDK_ROOT}/components/ble/peer_manager/security_dispatcher.c
   ${NRF_SDK_ROOT}/components/ble/peer_manager/security_manager.c
+  ${NRF_SDK_ROOT}/components/boards/boards.c
   ${NRF_SDK_ROOT}/components/libraries/atomic/nrf_atomic.c
   ${NRF_SDK_ROOT}/components/libraries/atomic_fifo/nrf_atfifo.c
   ${NRF_SDK_ROOT}/components/libraries/atomic_flags/nrf_atflags.c
@@ -273,63 +297,74 @@ set(NRF_SDK_LINK
   ${NRF_SDK_ROOT}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_3.0.1.a
 )
 
-###############################
-# micro-ecc
-
-set(MicroECC_DIR ${NRF_SDK_ROOT}/external/micro-ecc)
-
-add_library(
-  MicroECC STATIC
-  ${MicroECC_DIR}/micro-ecc/uECC.c
+# Onekey Pro2 Application source files
+set(
+  OK_APP_SRC
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_adv.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_adv_manage.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_init.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_peer_manage.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_service_bat.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_service_dev_info.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_service_fido.c
+  ${PROJECT_SOURCE_DIR}/ble/ok_ble_service_nus.c
+  ${PROJECT_SOURCE_DIR}/communication/ok_cmd_protocol.c
+  ${PROJECT_SOURCE_DIR}/communication/data_transmission.c
+  ${PROJECT_SOURCE_DIR}/communication/ok_serial_communication.c
+  ${PROJECT_SOURCE_DIR}/hw/ok_storage.c
+  ${PROJECT_SOURCE_DIR}/hw/ok_device_config.c
+  ${PROJECT_SOURCE_DIR}/hw/flashled_manage.c
+  ${PROJECT_SOURCE_DIR}/hw/ok_pwr_manage_ctrl.c
+  ${PROJECT_SOURCE_DIR}/hw/power_manage.c
+  ${PROJECT_SOURCE_DIR}/hw/ok_watch_dog.c
+  ${SDK_BUILD_ROOT}/components/nvs/nvs.c
+  ${SDK_BUILD_ROOT}/components/heap/sys_heap.c
+  ${SDK_BUILD_ROOT}/components/ecdsa/ecdsa.c
+  ${SDK_BUILD_ROOT}/drivers/nrf_i2c.c
+  ${SDK_BUILD_ROOT}/drivers/nrf_uicr.c
+  ${SDK_BUILD_ROOT}/drivers/nrf_flash.c
+  ${SDK_BUILD_ROOT}/drivers/pmu/pmu.c
+  ${SDK_BUILD_ROOT}/drivers/pmu/ntc_util.c
+  ${SDK_BUILD_ROOT}/drivers/pmu/axp216.c
+  ${SDK_BUILD_ROOT}/drivers/pmu/axp2101.c
+  ${SDK_BUILD_ROOT}/drivers/light/lm36011.c
 )
 
-target_include_directories(
-  MicroECC PUBLIC
-  ${MicroECC_DIR}/micro-ecc
-  ${NRF_SDK_ROOT}/components/toolchain/cmsis/include
+set(
+  OK_APP_INC
+  ${PROJECT_SOURCE_DIR}/ble
+  ${PROJECT_SOURCE_DIR}/communication
+  ${PROJECT_SOURCE_DIR}/hw
+  ${SDK_BUILD_ROOT}/components
+  ${SDK_BUILD_ROOT}/components/nvs
+  ${SDK_BUILD_ROOT}/components/heap
+  ${SDK_BUILD_ROOT}/components/ecdsa
+  ${SDK_BUILD_ROOT}/artifacts # this is only for the dfu_upgrade_payload.h
+  ${SDK_BUILD_ROOT}/drivers
+  ${SDK_BUILD_ROOT}/drivers/pmu
+  ${SDK_BUILD_ROOT}/drivers/light
+  ${SDK_BUILD_ROOT}/fmnadk
 )
 
-target_compile_options(
-  MicroECC PRIVATE
-  # Optimization flags
-  -Os -g0 -s
-  # Uncomment the line below to enable link time optimization
-  # -flto=auto
-  # C flags common to all targets
-  -DFLOAT_ABI_HARD
-  -DuECC_ENABLE_VLI_API=0
-  -DuECC_OPTIMIZATION_LEVEL=3
-  -DuECC_SQUARE_FUNC=0
-  -DuECC_SUPPORT_COMPRESSED_POINT=0
-  -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
-  -Wall -Werror -Wno-unused-function
-  -mcpu=cortex-m4
-  -mthumb -mabi=aapcs
-  -mfloat-abi=hard -mfpu=fpv4-sp-d16
-  # keep every function in a separate section, this allows linker to discard unused ones
-  -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -fshort-enums 
-  # heap and stack (why set them for a library?)
-  # -D__HEAP_SIZE=4096
-  # -D__STACK_SIZE=4096
+# RTT debug source and include directories. Used only when RTT_DEBUG_ENABLE is enabled.
+if(RTT_DEBUG_ENABLE)
+  message(STATUS "Enable RTT Debug")
+endif()
+
+set(
+  OK_TEST_SRC
+  ${PROJECT_SOURCE_DIR}/xdebug/rtt_misc_debug.c
+  ${PROJECT_SOURCE_DIR}/xdebug/xdebug_flash_test.c
+  ${PROJECT_SOURCE_DIR}/xdebug/xdebug_flash_nvs_test.c
 )
 
-target_link_options(
-  MicroECC PRIVATE
-  # Linker flags
-  -Os -g0 -s
-  # let linker dump unused sections
-  -Wl,--gc-sections
-  -mcpu=cortex-m4
-  -mthumb -mabi=aapcs
-  -mfloat-abi=hard -mfpu=fpv4-sp-d16
-  # use newlib in nano version
-  --specs=nano.specs -lc -lnosys -lm
-  -L${NRF_SDK_ROOT}/modules/nrfx/mdk -T${MicroECC_DIR}/nrf52hf_armgcc/armgcc/ext_micro_ecc_gcc_nRF5x.ld
+set(
+  OK_TEST_INC
+  ${PROJECT_SOURCE_DIR}/xdebug
 )
 
 ###############################
 # Target
-
 add_executable(
   ${CMAKE_PROJECT_NAME} 
   main.c
@@ -338,30 +373,16 @@ add_executable(
 target_sources(
   ${CMAKE_PROJECT_NAME} PRIVATE 
   ${NRF_SDK_SRC}
-  ../drivers/nrf_i2c.c
-  ../drivers/nrf_uicr.c
-  ../drivers/nrf_flash.c
-  ../drivers/pmu/pmu.c
-  ../drivers/pmu/ntc_util.c
-  ../drivers/pmu/axp216.c
-  ../drivers/pmu/axp2101.c
-  ../drivers/light/lm36011.c
-  data_transmission.c
-  ecdsa.c
-  power_manage.c
-  flashled_manage.c
-  device_config.c
-  dfu_upgrade.c
+  ${OK_APP_SRC}
+  $<$<BOOL:${RTT_DEBUG_ENABLE}>:${OK_TEST_SRC}>
 )
 
 target_include_directories(
   ${CMAKE_PROJECT_NAME} PRIVATE
   ${PROJECT_SOURCE_DIR}
   ${NRF_SDK_INC}
-  ../artifacts # this is only for the dfu_upgrade_payload.h
-  ../drivers
-  ../drivers/pmu
-  ../drivers/light
+  ${OK_APP_INC}
+  $<$<BOOL:${RTT_DEBUG_ENABLE}>:${OK_TEST_INC}>
 )
 
 execute_process(
@@ -370,6 +391,7 @@ execute_process(
 	OUTPUT_VARIABLE GIT_VERSION
 )
 add_definitions('-DBUILD_ID=\"${GIT_VERSION}\"')
+add_definitions("-DRTT_DEBUG_ENABLE=${RTT_DEBUG_ENABLE}")
 
 target_compile_definitions(
   ${CMAKE_PROJECT_NAME} PRIVATE
@@ -384,6 +406,7 @@ target_compile_definitions(
   FLOAT_ABI_HARD
   NRF52
   NRF52832_XXAA
+  BOARD_PCA10040
   NRF_SD_BLE_API_VERSION=7
   S132
   SOFTDEVICE_PRESENT
@@ -395,7 +418,7 @@ target_compile_definitions(
   NRF_APP_VERSION_ADDR=0x1D000
   NRF_CRYPTO_MAX_INSTANCE_COUNT=1
   # heap and stack
-  __HEAP_SIZE=8192
+  __HEAP_SIZE=0
   __STACK_SIZE=8192
 )
 
@@ -440,12 +463,19 @@ target_link_options(
   # use newlib in nano version
   --specs=nano.specs -lc -lnosys -lm
   -L${NRF_SDK_ROOT}/modules/nrfx/mdk -T${PROJECT_SOURCE_DIR}/ble_app_gcc_nrf52.ld
+  -Wl,-Map=${CMAKE_PROJECT_NAME}.map
+)
+
+add_library(Fmnadk STATIC IMPORTED)
+set_target_properties(Fmnadk PROPERTIES
+  IMPORTED_LOCATION "${SDK_BUILD_ROOT}/fmnadk/lib/libfmnadk.a"
 )
 
 target_link_libraries(
   ${CMAKE_PROJECT_NAME} PRIVATE
   ${NRF_SDK_LINK}
   MicroECC
+  Fmnadk
   m # math
 )
 

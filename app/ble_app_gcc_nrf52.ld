@@ -5,7 +5,7 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  RAM (rwx) :  ORIGIN = 0x20003268, LENGTH = 0xCD98
+  RAM (rwx) :  ORIGIN = 0x20004400, LENGTH = 0xBC00
   CONFIG (rw) : ORIGIN = 0x6A000, LENGTH = 0x1000
   FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x44000
   /* Note: FDS from SDK using few pages of flash without mention in this file! */

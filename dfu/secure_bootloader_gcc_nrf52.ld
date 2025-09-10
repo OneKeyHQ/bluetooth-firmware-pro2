@@ -9,7 +9,7 @@ MEMORY
 
   bootloader_settings_page (r) : ORIGIN = 0x0007F000, LENGTH = 0x1000
   mbr_params_page (r) : ORIGIN = 0x0007E000, LENGTH = 0x1000
-  FLASH (rx) : ORIGIN = 0x6E000, LENGTH = 0x10000
+  FLASH (rx) : ORIGIN = 0x70000, LENGTH = 0xE000
 
   /* UICR location is deprecated long ago, we are using flash mbr location here */
   /* mbr_bootloader_start_address (r) : ORIGIN = 0xFF8, LENGTH = 0x4 */
